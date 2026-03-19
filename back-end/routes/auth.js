@@ -1,59 +1,84 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const { protect } = require("../middleware/auth");
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
-      select: false,
-    },
-    role: {
-      type: String,
-      enum: ["customer", "restaurant_admin", "rider", "super_admin"],
-      default: "customer",
-    },
-    phone: { type: String, trim: true },
-    address: { type: String, trim: true },
-    isActive: { type: Boolean, default: true },
-    // Rider-specific
-    vehicleType: { type: String },
-    isAvailable: { type: Boolean, default: true },
-  },
-  { timestamps: true }
-);
+const router = express.Router();
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+const signToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
+
+// ── POST /api/auth/register ──────────────────────────────────
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, role, phone, address } = req.body;
+
+    // Prevent self-registration as super_admin
+    const allowedRoles = ["customer", "restaurant_admin", "rider"];
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: "Invalid role. Allowed: customer, restaurant_admin, rider" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: "Email already registered." });
+    }
+
+    const user = await User.create({ name, email, password, role: role || "customer", phone, address });
+    const token = signToken(user._id);
+
+    res.status(201).json({ success: true, message: "Registration successful", token, user });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ success: false, message: messages.join(", ") });
+    }
+    res.status(500).json({ success: false, message: "Server error during registration" });
+  }
 });
 
-// Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
+// ── POST /api/auth/login ─────────────────────────────────────
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-// Remove password from JSON output
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required." });
+    }
 
-module.exports = mongoose.model("User", userSchema);
+    const user = await User.findOne({ email }).select("+password");
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ success: false, message: "Invalid email or password." });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: "Your account has been deactivated." });
+    }
+
+    const token = signToken(user._id);
+    // Remove password from output
+    user.password = undefined;
+
+    res.json({ success: true, message: "Login successful", token, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error during login" });
+  }
+});
+
+// ── GET /api/auth/me ─────────────────────────────────────────
+router.get("/me", protect, async (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
+// ── PUT /api/auth/update-profile ─────────────────────────────
+router.put("/update-profile", protect, async (req, res) => {
+  try {
+    const { name, phone, address } = req.body;
+    const user = await User.findByIdAndUpdate(req.user._id, { name, phone, address }, { new: true, runValidators: true });
+    res.json({ success: true, message: "Profile updated", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating profile" });
+  }
+});
+
+module.exports = router;
