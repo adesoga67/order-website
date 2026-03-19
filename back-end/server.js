@@ -8,7 +8,7 @@ const path = require("path");
 
 const authRoutes = require("./routes/auth");
 const menuRoutes = require("./routes/menu");
-const orderRoutes = require("./routes/orders");
+const orderRoutes = require("./routes/order");
 const userRoutes = require("./routes/users");
 const socketService = require("./services/socketService");
 
