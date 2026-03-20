@@ -402,6 +402,35 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- IMAGE UPLOAD MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="img-upload-modal">
+  <div class="modal modal-img">
+    <div class="modal-header">
+      <h3 id="img-modal-title">Upload image</h3>
+      <button class="modal-close" onclick="closeImageModal()">✕</button>
+    </div>
+    <form id="img-modal-form">
+      <input type="hidden" id="img-modal-item-id" />
+      <div class="img-upload-area" id="img-modal-area">
+        <input type="file" id="img-modal-file" accept="image/jpeg,image/png,image/webp" />
+        <div class="upload-hint" id="img-modal-hint">
+          <div class="upload-hint-icon">📷</div>
+          <div class="upload-hint-text">Click or drag &amp; drop your food photo<br><span class="upload-hint-sub">JPEG, PNG or WebP · Max 5MB · Square images work best</span></div>
+        </div>
+        <img id="img-modal-preview" class="img-preview" alt="Preview" />
+      </div>
+      <div class="img-modal-tips">
+        <div class="img-tip">✅ Use a square photo (600×600px or larger)</div>
+        <div class="img-tip">✅ Good lighting makes food look more appetizing</div>
+        <div class="img-tip">✅ Plain or blurred background works best</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Upload Image</button>
+    </form>
+  </div>
+</div>
+
 <!-- ── Scripts ───────────────────────────────────────────────── -->
 <script src="js/api.js"></script>
 <script src="js/realtime.js"></script>
