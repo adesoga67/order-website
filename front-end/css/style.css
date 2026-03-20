@@ -466,3 +466,24 @@ tbody tr:last-child td { border-bottom: none; }
   .manage-menu-layout { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   LOGO STYLES
+   ══════════════════════════════════════════════════════════ */
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .navbar-logo { height: 32px; }
+}
