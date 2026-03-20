@@ -54,6 +54,32 @@ const Menu = {
   create: (payload) => apiFetch("/menu", { method: "POST", body: JSON.stringify(payload) }),
   update: (id, payload) => apiFetch(`/menu/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   delete: (id) => apiFetch(`/menu/${id}`, { method: "DELETE" }),
+
+  // Multipart upload — used when creating a menu item with an image
+  createWithImage: async (formData) => {
+    const token = getToken();
+    const res = await fetch(`${API_URL}/menu`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Request failed");
+    return data;
+  },
+
+  // Multipart upload — used when updating an existing item's image
+  updateWithImage: async (id, formData) => {
+    const token = getToken();
+    const res = await fetch(`${API_URL}/menu/${id}`, {
+      method: "PUT",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Request failed");
+    return data;
+  },
 };
 
 // ── Orders API ───────────────────────────────────────────────
@@ -64,6 +90,8 @@ const Orders = {
   updateStatus: (id, status) => apiFetch(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   assignRider: (id, riderId) => apiFetch(`/orders/${id}/assign-rider`, { method: "PATCH", body: JSON.stringify({ riderId }) }),
   markDelivered: (id) => apiFetch(`/orders/${id}/deliver`, { method: "PATCH" }),
+  pay: (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" }),
+  verifyPayment: (id, ref) => apiFetch(`/orders/${id}/verify-payment?reference=${ref}`),
 };
 
 // ── Users API ─────────────────────────────────────────────────
