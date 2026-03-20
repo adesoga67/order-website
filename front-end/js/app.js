@@ -274,17 +274,23 @@ const Pages = {
         const grid = document.getElementById("manage-menu-grid");
         if (!res.data.length) { grid.innerHTML = `<div class="empty-state"><div class="emoji">🍽️</div><h3>No items yet — add one!</h3></div>`; return; }
         grid.innerHTML = res.data.map(item => `
-          <div class="card" style="margin-bottom:12px;display:flex;align-items:center;gap:14px">
-            ${item.image
-              ? `<img src="${API_BASE}${item.image}" style="width:56px;height:56px;object-fit:cover;border-radius:10px;flex-shrink:0" alt="${item.name}">`
-              : `<div style="font-size:36px;flex-shrink:0">${item.emoji||"🍽️"}</div>`}
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:15px">${item.name}</div>
-              <div style="font-size:13px;color:var(--muted)">${item.category} · ₦${item.price.toLocaleString()} · ${item.preparationTime}min</div>
+          <div class="card manage-menu-item">
+            <div class="manage-menu-thumb">
+              ${item.image
+                ? `<img src="${API_BASE}${item.image}" class="manage-menu-img" alt="${item.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+                   <div class="manage-menu-emoji" style="display:none">${item.emoji||"🍽️"}</div>`
+                : `<div class="manage-menu-emoji">${item.emoji||"🍽️"}</div>`}
             </div>
-            <span class="badge badge-${item.isAvailable?"delivered":"cancelled"}">${item.isAvailable?"On":"Off"}</span>
-            <button class="btn btn-ghost btn-sm" onclick="toggleItemAvailability('${item._id}',${item.isAvailable})">${item.isAvailable?"Disable":"Enable"}</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteMenuItem('${item._id}')">Delete</button>
+            <div class="manage-menu-info">
+              <div class="manage-menu-name">${item.name}</div>
+              <div class="manage-menu-meta">${item.category} · ₦${item.price.toLocaleString()} · ${item.preparationTime} min</div>
+            </div>
+            <div class="manage-menu-actions">
+              <span class="badge badge-${item.isAvailable?"delivered":"cancelled"}">${item.isAvailable?"On":"Off"}</span>
+              <button class="btn btn-ghost btn-sm" onclick="openImageUploadModal('${item._id}','${item.name.replace(/'/g,"\'")}')">📷 Image</button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleItemAvailability('${item._id}',${item.isAvailable})">${item.isAvailable?"Disable":"Enable"}</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteMenuItem('${item._id}')">Delete</button>
+            </div>
           </div>`).join("");
       } catch (err) { toast("Failed to load menu items", "error"); }
     },
@@ -646,4 +652,89 @@ document.addEventListener("DOMContentLoaded", () => {
   updateCartBadge();
   // Wire up image upload drag & drop preview
   initImageUpload("item-image", "item-image-preview", "item-upload-area");
+});
+
+/* ════════════════════════════════════════════════════════════
+   IMAGE UPLOAD MODAL — for existing menu items
+   ════════════════════════════════════════════════════════════ */
+
+function openImageUploadModal(itemId, itemName) {
+  document.getElementById("img-modal-title").textContent = `Upload image for "${itemName}"`;
+  document.getElementById("img-modal-item-id").value = itemId;
+  document.getElementById("img-modal-preview").style.display = "none";
+  document.getElementById("img-modal-preview").src = "";
+  document.getElementById("img-modal-file").value = "";
+  document.getElementById("img-modal-hint").style.display = "flex";
+  document.getElementById("img-upload-modal").classList.add("open");
+}
+
+function closeImageModal() {
+  document.getElementById("img-upload-modal").classList.remove("open");
+}
+
+document.getElementById("img-modal-file")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const preview = document.getElementById("img-modal-preview");
+    preview.src = e.target.result;
+    preview.style.display = "block";
+    document.getElementById("img-modal-hint").style.display = "none";
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("img-modal-area")?.addEventListener("click", () => {
+  document.getElementById("img-modal-file").click();
+});
+
+document.getElementById("img-modal-area")?.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  document.getElementById("img-modal-area").classList.add("dragover");
+});
+
+document.getElementById("img-modal-area")?.addEventListener("dragleave", () => {
+  document.getElementById("img-modal-area").classList.remove("dragover");
+});
+
+document.getElementById("img-modal-area")?.addEventListener("drop", (e) => {
+  e.preventDefault();
+  document.getElementById("img-modal-area").classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  document.getElementById("img-modal-file").files = dt.files;
+  document.getElementById("img-modal-file").dispatchEvent(new Event("change"));
+});
+
+document.getElementById("img-modal-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const itemId = document.getElementById("img-modal-item-id").value;
+  const fileInput = document.getElementById("img-modal-file");
+  const btn = e.target.querySelector("button[type=submit]");
+
+  if (!fileInput.files[0]) {
+    toast("Please select an image first", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+
+  try {
+    const formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+
+    const data = await Menu.updateWithImage(itemId, formData);
+    toast(`Image uploaded successfully! 🎉`, "success");
+    closeImageModal();
+    Pages["manage-menu"].load();
+  } catch (err) {
+    toast(`Upload failed: ${err.message}`, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Upload Image";
+  }
 });
