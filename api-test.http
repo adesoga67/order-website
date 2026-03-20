@@ -1,0 +1,93 @@
+@base_url = http://localhost:5000/api
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YmNlOTI1NmUxOTJlY2VlYzNhNmZiZiIsImlhdCI6MTc3Mzk4OTI1NCwiZXhwIjoxNzc0NTk0MDU0fQ.xCHjbhps5cWoGByGYNo1A_9grXWKYy1R1SXBiawTDJY
+### Health Check
+GET {{base_url}}/health
+
+### Register
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test Customer",
+  "email": "testcustomer@gmail.com",
+  "password": "test123",
+  "role": "customer",
+  "phone": "+234 801 000 0000"
+}
+
+### Login
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "testcustomer@gmail.com",
+  "password": "test123"
+}
+
+### Get Menu (public)
+GET {{base_url}}/menu
+
+### Get My Orders (paste your token below)
+GET {{base_url}}/orders
+Authorization: Bearer {{token}}
+
+### Get Menu by Category
+GET {{base_url}}/menu?category=Rice Dishes
+
+
+### Get All Menu Items
+GET {{base_url}}/menu
+
+### Place an Order
+POST {{base_url}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "items": [
+    {
+      "menuItem": "PASTE_REAL_ID_HERE",
+      "name": "Jollof Rice & Chicken",
+      "price": 2500,
+      "quantity": 2,
+      "emoji": "🍛"
+    }
+  ],
+  "deliveryAddress": "12 Admiralty Way, Lekki, Lagos",
+  "note": "Extra spicy please"
+}
+
+### Login as Customer
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@demo.com",
+  "password": "demo123"
+}
+
+### Get Menu (public)
+GET {{base_url}}/menu
+
+### Get My Orders (paste your token below)
+GET {{base_url}}/orders
+Authorization: Bearer {{token}}
+
+### Place an Order
+POST {{base_url}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "items": [
+    {
+      "menuItem": "69bce92e6e192eceec3a6fc7",
+      "name": "Jollof Rice & Chicken",
+      "price": 2500,
+      "quantity": 2,
+      "emoji": "🍛"
+    }
+  ],
+  "deliveryAddress": "12 Admiralty Way, Lekki, Lagos",
+  "note": "Extra spicy please"
+}
