@@ -27,7 +27,7 @@
       🔔 <span class="notif-badge" id="notif-badge">0</span>
     </button>
     <button class="btn btn-ghost btn-sm cart-btn hidden" id="cart-btn" onclick="openCart()">
-      🛒 Cart <span class="cart-badge hidden" id="cart-badge">0</span>
+      Cart <span class="cart-badge hidden" id="cart-badge">0</span>
     </button>
     <div id="user-info" class="user-info"></div>
     <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
@@ -112,10 +112,10 @@
         <!-- Demo logins -->
         <div class="demo-logins">
           <h4>Quick demo access</h4>
-          <button class="demo-btn" onclick="demoLogin('customer@demo.com')">👤 Customer demo</button>
-          <button class="demo-btn" onclick="demoLogin('restaurant@demo.com')">👨‍🍳 Restaurant Admin demo</button>
-          <button class="demo-btn" onclick="demoLogin('rider@demo.com')">🏍️ Rider demo</button>
-          <button class="demo-btn" onclick="demoLogin('admin@demo.com')">🛡️ Super Admin demo</button>
+          <button class="demo-btn" onclick="demoLogin('customer@demo.com')">Customer demo</button>
+          <button class="demo-btn" onclick="demoLogin('restaurant@demo.com')">Restaurant Admin demo</button>
+          <button class="demo-btn" onclick="demoLogin('rider@demo.com')">Rider demo</button>
+          <button class="demo-btn" onclick="demoLogin('admin@demo.com')">Super Admin demo</button>
           <p class="demo-hint">Password for all demos: <strong>demo123</strong></p>
         </div>
       </div>
@@ -135,7 +135,7 @@
   <div id="menu-filters" class="menu-filters"></div>
   <div id="menu-grid" class="menu-grid">
     <div class="empty-state">
-      <div class="emoji">⏳</div>
+      <div class="emoji">Loading...</div>
       <h3>Loading menu…</h3>
     </div>
   </div>
@@ -351,7 +351,7 @@
         <span>Total to pay:</span>
         <span id="checkout-total-display" class="checkout-total-amount"></span>
       </div>
-      <button type="submit" class="btn btn-primary btn-full">Place Order 🎉</button>
+      <button type="submit" class="btn btn-primary btn-full">Place Order</button>
     </form>
   </div>
 </div>
