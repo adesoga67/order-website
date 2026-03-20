@@ -8,12 +8,12 @@ let notifCount = 0;
 
 /* ── ORDER TRACKER STEPS ─────────────────────────────────── */
 const TRACKER_STEPS = [
-  { key: "pending", icon: "🛒", label: "Placed" },
-  { key: "confirmed", icon: "✅", label: "Confirmed" },
-  { key: "preparing", icon: "👨‍🍳", label: "Cooking" },
-  { key: "ready", icon: "📦", label: "Ready" },
-  { key: "in-transit", icon: "🏍️", label: "On the way" },
-  { key: "delivered", icon: "🎉", label: "Delivered" },
+  { key: "pending",    icon: "🛒", label: "Placed"    },
+  { key: "confirmed",  icon: "✅", label: "Confirmed" },
+  { key: "preparing",  icon: "👨‍🍳", label: "Cooking"  },
+  { key: "ready",      icon: "📦", label: "Ready"     },
+  { key: "in-transit", icon: "🏍️", label: "On the way"},
+  { key: "delivered",  icon: "🎉", label: "Delivered" },
 ];
 
 /* ── Connect Socket.io ───────────────────────────────────── */
@@ -42,9 +42,8 @@ function _initSocket(user) {
 
     // Join role-specific rooms
     if (user.role === "customer") socket.emit("join:customer", user._id);
-    if (user.role === "rider") socket.emit("join:rider", user._id);
-    if (user.role === "restaurant_admin" || user.role === "super_admin")
-      socket.emit("join:restaurant");
+    if (user.role === "rider")    socket.emit("join:rider", user._id);
+    if (user.role === "restaurant_admin" || user.role === "super_admin") socket.emit("join:restaurant");
 
     // Show live indicator
     document.getElementById("live-indicator")?.classList.remove("hidden");
@@ -57,16 +56,10 @@ function _initSocket(user) {
   // ── New order (restaurant/admin only) ───────────────────
   socket.on("order:new", (data) => {
     bumpNotif();
-    toast(
-      `🆕 New order ${data.orderNumber} from ${data.customerName} — ₦${data.total?.toLocaleString()}`,
-      "info",
-    );
+    toast(`🆕 New order ${data.orderNumber} from ${data.customerName} — ₦${data.total?.toLocaleString()}`, "info");
 
     // Auto-refresh dashboard if currently on it
-    if (
-      App.currentPage === "restaurant-dashboard" ||
-      App.currentPage === "admin-dashboard"
-    ) {
+    if (App.currentPage === "restaurant-dashboard" || App.currentPage === "admin-dashboard") {
       Pages[App.currentPage]?.load?.();
     }
   });
@@ -74,33 +67,23 @@ function _initSocket(user) {
   // ── Order status changed ─────────────────────────────────
   socket.on("order:status_update", (data) => {
     const statusMsg = {
-      confirmed: `✅ Order ${data.orderNumber} confirmed!`,
-      preparing: `👨‍🍳 Your order ${data.orderNumber} is being prepared`,
-      "in-transit": `🏍️ Rider is on the way with ${data.orderNumber}!`,
-      delivered: `🎉 Order ${data.orderNumber} delivered! Enjoy your meal!`,
-      cancelled: `❌ Order ${data.orderNumber} was cancelled`,
+      confirmed:   `✅ Order ${data.orderNumber} confirmed!`,
+      preparing:   `👨‍🍳 Your order ${data.orderNumber} is being prepared`,
+      "in-transit":`🏍️ Rider is on the way with ${data.orderNumber}!`,
+      delivered:   `🎉 Order ${data.orderNumber} delivered! Enjoy your meal!`,
+      cancelled:   `❌ Order ${data.orderNumber} was cancelled`,
     };
 
     const user = Auth.getUser();
     if (user.role === "customer" && statusMsg[data.status]) {
-      toast(
-        statusMsg[data.status],
-        data.status === "cancelled" ? "error" : "success",
-      );
+      toast(statusMsg[data.status], data.status === "cancelled" ? "error" : "success");
     }
 
     // Live-update the tracker if customer is watching this order
     updateTracker(data.orderId, data.status);
 
     // Refresh the current page if order-related
-    const refreshPages = [
-      "my-orders",
-      "restaurant-dashboard",
-      "rider-dashboard",
-      "admin-dashboard",
-      "admin-orders",
-      "restaurant-orders",
-    ];
+    const refreshPages = ["my-orders", "restaurant-dashboard", "rider-dashboard", "admin-dashboard", "admin-orders", "restaurant-orders"];
     if (refreshPages.includes(App.currentPage)) {
       Pages[App.currentPage]?.load?.();
     }
@@ -108,10 +91,7 @@ function _initSocket(user) {
 
   // ── Order assigned to rider ──────────────────────────────
   socket.on("order:assigned", (data) => {
-    toast(
-      `🏍️ New delivery assigned: ${data.orderNumber} → ${data.deliveryAddress}`,
-      "info",
-    );
+    toast(`🏍️ New delivery assigned: ${data.orderNumber} → ${data.deliveryAddress}`, "info");
     bumpNotif();
     if (App.currentPage === "rider-dashboard") Pages["rider-dashboard"].load();
   });
@@ -132,10 +112,7 @@ function disconnectSocket() {
 function bumpNotif() {
   notifCount++;
   const badge = document.getElementById("notif-badge");
-  if (badge) {
-    badge.textContent = notifCount;
-    badge.style.display = "flex";
-  }
+  if (badge) { badge.textContent = notifCount; badge.style.display = "flex"; }
 }
 
 function clearNotif() {
@@ -157,27 +134,23 @@ async function renderTrackerModal(orderId) {
   try {
     const res = await Orders.getOne(orderId);
     const order = res.data;
-    const currentIdx = TRACKER_STEPS.findIndex((s) => s.key === order.status);
+    const currentIdx = TRACKER_STEPS.findIndex(s => s.key === order.status);
 
-    document.getElementById("tracker-order-num").textContent =
-      order.orderNumber;
-    document.getElementById("tracker-address").textContent =
-      order.deliveryAddress;
-    document.getElementById("tracker-total").textContent =
-      `₦${order.total.toLocaleString()}`;
-    document.getElementById("tracker-payment").innerHTML =
+    document.getElementById("tracker-order-num").textContent = order.orderNumber;
+    document.getElementById("tracker-address").textContent   = order.deliveryAddress;
+    document.getElementById("tracker-total").textContent     = `₦${order.total.toLocaleString()}`;
+    document.getElementById("tracker-payment").innerHTML     =
       order.paymentStatus === "paid"
         ? `<span class="payment-badge-paid">💳 Paid</span>`
         : `<span class="payment-badge-pending">⏳ Payment pending</span>
            <button class="pay-now-btn" style="margin-left:10px" onclick="startPayment('${order._id}')">Pay Now</button>`;
 
     // Build steps
-    const progressPct =
-      currentIdx >= 0 ? (currentIdx / (TRACKER_STEPS.length - 1)) * 100 : 0;
+    const progressPct = currentIdx >= 0 ? (currentIdx / (TRACKER_STEPS.length - 1)) * 100 : 0;
     document.getElementById("tracker-steps").innerHTML = `
       <div class="tracker-progress" style="width:${progressPct}%"></div>
       ${TRACKER_STEPS.map((step, i) => {
-        const isDone = i < currentIdx;
+        const isDone   = i < currentIdx;
         const isActive = i === currentIdx;
         return `<div class="tracker-step ${isDone ? "done" : ""} ${isActive ? "active" : ""}">
           <div class="tracker-dot">${isDone ? "✓" : step.icon}</div>
@@ -187,17 +160,11 @@ async function renderTrackerModal(orderId) {
 
     // Status history timeline
     document.getElementById("tracker-history").innerHTML = order.statusHistory
-      .slice()
-      .reverse()
-      .map(
-        (
-          h,
-        ) => `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+      .slice().reverse()
+      .map(h => `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
         <span class="badge badge-${h.status}" style="flex-shrink:0">${h.status}</span>
         <span style="color:var(--muted)">${new Date(h.timestamp).toLocaleString("en-NG")}</span>
-      </div>`,
-      )
-      .join("");
+      </div>`).join("");
 
     if (order.rider) {
       document.getElementById("tracker-rider").innerHTML = `
@@ -218,10 +185,7 @@ async function renderTrackerModal(orderId) {
 
 function updateTracker(orderId, newStatus) {
   // If the tracker modal is open for this exact order, refresh it live
-  if (
-    activeTrackerOrderId === orderId &&
-    document.getElementById("tracker-modal").classList.contains("open")
-  ) {
+  if (activeTrackerOrderId === orderId && document.getElementById("tracker-modal").classList.contains("open")) {
     renderTrackerModal(orderId);
   }
 }
@@ -240,26 +204,18 @@ async function startPayment(orderId) {
 
     const user = Auth.getUser();
     const handler = PaystackPop.setup({
-      key:
-        window.PAYSTACK_PUBLIC_KEY ||
-        prompt("Enter your Paystack public key (pk_test_...):"),
+      key: window.PAYSTACK_PUBLIC_KEY || prompt("Enter your Paystack public key (pk_test_...):"),
       email: user.email,
       ref: reference,
       onSuccess: async (txn) => {
         toast("✅ Payment successful! Verifying…", "success");
         try {
           await Orders.verifyPayment(orderId, txn.reference);
-          toast(
-            "🎉 Payment confirmed! Your order is being prepared.",
-            "success",
-          );
+          toast("🎉 Payment confirmed! Your order is being prepared.", "success");
           renderTrackerModal(orderId);
           if (App.currentPage === "my-orders") Pages["my-orders"].load();
         } catch (e) {
-          toast(
-            "Payment recorded but verification pending. Check your email.",
-            "info",
-          );
+          toast("Payment recorded but verification pending. Check your email.", "info");
         }
       },
       onCancel: () => toast("Payment cancelled", "error"),
@@ -273,9 +229,7 @@ async function startPayment(orderId) {
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
+    s.src = src; s.onload = resolve; s.onerror = reject;
     document.head.appendChild(s);
   });
 }
@@ -288,10 +242,7 @@ function initImageUpload(inputId, previewId, areaId) {
   if (!input || !preview || !area) return;
 
   area.addEventListener("click", () => input.click());
-  area.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    area.classList.add("dragover");
-  });
+  area.addEventListener("dragover", (e) => { e.preventDefault(); area.classList.add("dragover"); });
   area.addEventListener("dragleave", () => area.classList.remove("dragover"));
   area.addEventListener("drop", (e) => {
     e.preventDefault();
@@ -321,9 +272,8 @@ function showPreview(file, previewEl, areaEl) {
 // These get appended after api.js loads
 window.addEventListener("DOMContentLoaded", () => {
   // Patch Orders object with new endpoints
-  Orders.pay = (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" });
-  Orders.verifyPayment = (id, ref) =>
-    apiFetch(`/orders/${id}/verify-payment?reference=${ref}`);
+  Orders.pay          = (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" });
+  Orders.verifyPayment = (id, ref) => apiFetch(`/orders/${id}/verify-payment?reference=${ref}`);
 
   // Patch Menu.create to use FormData (supports file uploads)
   Menu.createWithImage = async (formData) => {
