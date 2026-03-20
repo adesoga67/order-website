@@ -65,3 +65,29 @@ Content-Type: application/json
   "email": "customer@demo.com",
   "password": "demo123"
 }
+
+### Get Menu (public)
+GET {{base_url}}/menu
+
+### Get My Orders (paste your token below)
+GET {{base_url}}/orders
+Authorization: Bearer {{token}}
+
+### Place an Order
+POST {{base_url}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "items": [
+    {
+      "menuItem": "69bce92e6e192eceec3a6fc7",
+      "name": "Jollof Rice & Chicken",
+      "price": 2500,
+      "quantity": 2,
+      "emoji": "🍛"
+    }
+  ],
+  "deliveryAddress": "12 Admiralty Way, Lekki, Lagos",
+  "note": "Extra spicy please"
+}
