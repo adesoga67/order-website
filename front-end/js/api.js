@@ -42,7 +42,6 @@ const Auth = {
   logout() {
     removeToken();
     removeUser();
-    window.location.reload();
   },
   getUser,
   isLoggedIn: () => !!getToken(),

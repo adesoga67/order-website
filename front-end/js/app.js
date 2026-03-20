@@ -443,10 +443,7 @@ function demoLogin(email) {
 document.getElementById("logout-btn").addEventListener("click", () => {
   Cart.clear();
   disconnectSocket();
-
-  // Clear stored credentials
-  removeToken();
-  removeUser();
+  Auth.logout();
 
   // Reset app state
   App.user = null;
@@ -458,7 +455,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById("page-auth").classList.add("active");
 
-  // Clear form fields
+  // Clear login form fields
   document.getElementById("login-email").value = "";
   document.getElementById("login-password").value = "";
 
