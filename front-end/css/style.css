@@ -487,3 +487,97 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 768px) {
   .navbar-logo { height: 32px; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   MANAGE MENU ITEM CARDS
+   ══════════════════════════════════════════════════════════ */
+
+.manage-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+}
+
+.manage-menu-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.manage-menu-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+
+.manage-menu-emoji {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.manage-menu-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.manage-menu-name {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.manage-menu-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.manage-menu-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Image Upload Modal ────────────────────────────────── */
+.modal-img { max-width: 480px; width: 100%; }
+
+.img-modal-tips {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.img-tip {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Menu card image (replaces emoji) ──────────────────── */
+.menu-card-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+@media (max-width: 768px) {
+  .manage-menu-actions { gap: 5px; }
+  .manage-menu-actions .btn { padding: 5px 10px; font-size: 12px; }
+}
