@@ -443,7 +443,26 @@ function demoLogin(email) {
 document.getElementById("logout-btn").addEventListener("click", () => {
   Cart.clear();
   disconnectSocket();
-  Auth.logout();
+
+  // Clear stored credentials
+  removeToken();
+  removeUser();
+
+  // Reset app state
+  App.user = null;
+
+  // Hide navbar
+  document.getElementById("navbar").classList.add("hidden");
+
+  // Show auth page
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-auth").classList.add("active");
+
+  // Clear form fields
+  document.getElementById("login-email").value = "";
+  document.getElementById("login-password").value = "";
+
+  toast("You have been signed out", "info");
 });
 
 /* ════════════════════════════════════════════════════════════
