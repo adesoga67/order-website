@@ -15,7 +15,7 @@ const App = {
     if (Auth.isLoggedIn() && this.user) {
       this.showNavbar();
       this.navigateTo(this.defaultPageForRole(this.user.role));
-      connectSocket();
+      try { connectSocket(); } catch(e) {}
     } else {
       document.getElementById("navbar").classList.add("hidden");
       this.showPage("auth");
@@ -36,13 +36,8 @@ const App = {
 
   setupNavbarExtras() {
     const role = this.user.role;
-    // Cart button — customers only
-    const cartBtn = document.getElementById("cart-btn");
-    cartBtn.classList.toggle("hidden", role !== "customer");
-
-    // Notification bell — non-customers
-    const notifBtn = document.getElementById("notif-btn");
-    notifBtn.classList.toggle("hidden", role === "customer");
+    document.getElementById("cart-btn").classList.toggle("hidden", role !== "customer");
+    document.getElementById("notif-btn").classList.toggle("hidden", role === "customer");
   },
 
   renderNavLinks() {
@@ -137,7 +132,6 @@ function renderOrderTable(orders, { showRiderAssign = false, showStatusSelect = 
    ════════════════════════════════════════════════════════════ */
 const Pages = {
 
-  /* ── Customer: Menu ──────────────────────────────────────── */
   menu: {
     items: [],
     async load() {
@@ -186,7 +180,6 @@ const Pages = {
     },
   },
 
-  /* ── Customer: My Orders ─────────────────────────────────── */
   "my-orders": {
     async load() {
       try {
@@ -227,7 +220,6 @@ const Pages = {
     },
   },
 
-  /* ── Restaurant Admin: Dashboard ─────────────────────────── */
   "restaurant-dashboard": {
     async load() {
       try {
@@ -245,28 +237,20 @@ const Pages = {
           { label: "In Progress", value: stats.active, icon: "👨‍🍳" },
           { label: "Revenue (delivered)", value: `₦${stats.revenue.toLocaleString()}`, icon: "💰" },
         ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join("");
-
-        document.getElementById("rd-recent-orders").innerHTML = renderOrderTable(
-          orders.slice(0, 20),
-          { showStatusSelect: true, showRiderAssign: true }
-        );
+        document.getElementById("rd-recent-orders").innerHTML = renderOrderTable(orders.slice(0,20), { showStatusSelect: true, showRiderAssign: true });
       } catch (err) { toast("Failed to load dashboard", "error"); }
     },
   },
 
-  /* ── Restaurant Admin: Orders (same as dashboard table) ──── */
   "restaurant-orders": {
     async load() {
       try {
         const res = await Orders.getAll();
-        document.getElementById("restaurant-orders-list").innerHTML = renderOrderTable(
-          res.data, { showStatusSelect: true, showRiderAssign: true }
-        );
+        document.getElementById("restaurant-orders-list").innerHTML = renderOrderTable(res.data, { showStatusSelect: true, showRiderAssign: true });
       } catch (err) { toast("Failed to load orders", "error"); }
     },
   },
 
-  /* ── Restaurant Admin: Manage Menu ──────────────────────── */
   "manage-menu": {
     async load() {
       try {
@@ -287,7 +271,7 @@ const Pages = {
             </div>
             <div class="manage-menu-actions">
               <span class="badge badge-${item.isAvailable?"delivered":"cancelled"}">${item.isAvailable?"On":"Off"}</span>
-              <button class="btn btn-ghost btn-sm" onclick="openImageUploadModal('${item._id}','${item.name.replace(/'/g,"\'")}')">📷 Image</button>
+              <button class="btn btn-ghost btn-sm" onclick="openImageUploadModal('${item._id}','${item.name.replace(/'/g,"\\'")}')">📷 Image</button>
               <button class="btn btn-ghost btn-sm" onclick="toggleItemAvailability('${item._id}',${item.isAvailable})">${item.isAvailable?"Disable":"Enable"}</button>
               <button class="btn btn-danger btn-sm" onclick="deleteMenuItem('${item._id}')">Delete</button>
             </div>
@@ -296,7 +280,6 @@ const Pages = {
     },
   },
 
-  /* ── Rider: Dashboard ────────────────────────────────────── */
   "rider-dashboard": {
     async load() {
       try {
@@ -306,7 +289,6 @@ const Pages = {
           { label: "Active Deliveries", value: orders.filter(o=>o.status==="in-transit").length, icon: "🏍️" },
           { label: "Completed", value: orders.filter(o=>o.status==="delivered").length, icon: "✅" },
         ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join("");
-
         document.getElementById("rider-orders").innerHTML = !orders.length
           ? `<div class="empty-state"><div class="emoji">🏍️</div><h3>No deliveries assigned yet</h3></div>`
           : `<div class="table-wrapper"><table>
@@ -317,16 +299,13 @@ const Pages = {
                 <td style="font-size:13px">${o.deliveryAddress}</td>
                 <td>₦${o.total.toLocaleString()}</td>
                 <td><span class="badge badge-${o.status}">${o.status}</span></td>
-                <td>${o.status==="in-transit"
-                  ? `<button class="btn btn-primary btn-sm" onclick="markDelivered('${o._id}')">✅ Delivered</button>`
-                  : "—"}</td>
+                <td>${o.status==="in-transit"?`<button class="btn btn-primary btn-sm" onclick="markDelivered('${o._id}')">✅ Delivered</button>`:"—"}</td>
               </tr>`).join("")}
               </tbody></table></div>`;
       } catch (err) { toast("Failed to load deliveries", "error"); }
     },
   },
 
-  /* ── Super Admin: Dashboard ──────────────────────────────── */
   "admin-dashboard": {
     async load() {
       try {
@@ -338,27 +317,20 @@ const Pages = {
           { label: "Active Orders", value: orders.filter(o=>!["delivered","cancelled"].includes(o.status)).length, icon: "🔥" },
           { label: "Total Revenue", value: `₦${orders.filter(o=>o.status==="delivered").reduce((s,o)=>s+o.total,0).toLocaleString()}`, icon: "💰" },
         ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join("");
-
-        document.getElementById("admin-recent-orders").innerHTML = renderOrderTable(
-          orders.slice(0,15), { showStatusSelect: true }
-        );
+        document.getElementById("admin-recent-orders").innerHTML = renderOrderTable(orders.slice(0,15), { showStatusSelect: true });
       } catch (err) { toast("Failed to load admin dashboard", "error"); }
     },
   },
 
-  /* ── Super Admin: All Orders ─────────────────────────────── */
   "admin-orders": {
     async load() {
       try {
         const res = await Orders.getAll();
-        document.getElementById("admin-orders-list").innerHTML = renderOrderTable(
-          res.data, { showStatusSelect: true, showRiderAssign: true }
-        );
+        document.getElementById("admin-orders-list").innerHTML = renderOrderTable(res.data, { showStatusSelect: true, showRiderAssign: true });
       } catch (err) { toast("Failed to load orders", "error"); }
     },
   },
 
-  /* ── Super Admin: Users ──────────────────────────────────── */
   "admin-users": {
     async load() {
       try {
@@ -381,57 +353,21 @@ const Pages = {
 };
 
 /* ════════════════════════════════════════════════════════════
-   AUTH HANDLERS
+   FUNCTIONS (defined before DOMContentLoaded)
    ════════════════════════════════════════════════════════════ */
-document.querySelectorAll(".auth-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    document.querySelectorAll(".auth-form").forEach(f => f.classList.add("hidden"));
-    document.getElementById(`${tab.dataset.tab}-form`)?.classList.remove("hidden");
-  });
-});
 
-document.getElementById("login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = e.target.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "Signing in…";
-  try {
-    const data = await Auth.login(
-      document.getElementById("login-email").value,
-      document.getElementById("login-password").value
-    );
-    App.user = data.user;
-    App.showNavbar();
-    App.navigateTo(App.defaultPageForRole(data.user.role));
-    connectSocket();
-    toast(`Welcome back, ${data.user.name}! 🎉`, "success");
-    updateCartBadge();
-  } catch (err) { toast(err.message, "error"); }
-  finally { btn.disabled = false; btn.textContent = "Sign In"; }
-});
-
-document.getElementById("register-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = e.target.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "Creating account…";
-  try {
-    const data = await Auth.register({
-      name: document.getElementById("reg-name").value,
-      email: document.getElementById("reg-email").value,
-      password: document.getElementById("reg-password").value,
-      role: document.getElementById("reg-role").value,
-      phone: document.getElementById("reg-phone").value,
-    });
-    App.user = data.user;
-    App.showNavbar();
-    App.navigateTo(App.defaultPageForRole(data.user.role));
-    connectSocket();
-    toast(`Account created! Welcome, ${data.user.name}! 🎉`, "success");
-    updateCartBadge();
-  } catch (err) { toast(err.message, "error"); }
-  finally { btn.disabled = false; btn.textContent = "Create Account"; }
-});
+function handleLogout() {
+  try { Cart.clear(); } catch(e) {}
+  try { disconnectSocket(); } catch(e) {}
+  try { Auth.logout(); } catch(e) {}
+  App.user = null;
+  document.getElementById("navbar").classList.add("hidden");
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-auth").classList.add("active");
+  document.getElementById("login-email").value = "";
+  document.getElementById("login-password").value = "";
+  toast("You have been signed out", "info");
+}
 
 function demoLogin(email) {
   document.getElementById("login-email").value = email;
@@ -440,31 +376,6 @@ function demoLogin(email) {
   document.getElementById("login-form").requestSubmit();
 }
 
-document.getElementById("logout-btn").addEventListener("click", () => {
-  Cart.clear();
-  disconnectSocket();
-  Auth.logout();
-
-  // Reset app state
-  App.user = null;
-
-  // Hide navbar
-  document.getElementById("navbar").classList.add("hidden");
-
-  // Show auth page
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById("page-auth").classList.add("active");
-
-  // Clear login form fields
-  document.getElementById("login-email").value = "";
-  document.getElementById("login-password").value = "";
-
-  toast("You have been signed out", "info");
-});
-
-/* ════════════════════════════════════════════════════════════
-   CART
-   ════════════════════════════════════════════════════════════ */
 function updateCartBadge() {
   const count = Cart.count();
   const badge = document.getElementById("cart-badge");
@@ -482,8 +393,6 @@ function closeCart() {
   document.getElementById("cart-overlay").classList.remove("open");
   document.getElementById("cart-sidebar").classList.remove("open");
 }
-
-document.getElementById("cart-overlay").addEventListener("click", closeCart);
 
 function renderCart() {
   const items = Cart.get();
@@ -507,7 +416,6 @@ function renderCart() {
         <button class="qty-btn" onclick="changeQty('${item.menuItem}',${item.quantity+1})">+</button>
       </div>
     </div>`).join("");
-
   const subtotal = Cart.total();
   document.getElementById("cart-subtotal").textContent = `₦${subtotal.toLocaleString()}`;
   document.getElementById("cart-delivery").textContent = "₦500";
@@ -519,13 +427,6 @@ function changeQty(id, qty) {
   renderCart(); updateCartBadge();
 }
 
-document.getElementById("checkout-btn").addEventListener("click", () => {
-  closeCart(); openCheckoutModal();
-});
-
-/* ════════════════════════════════════════════════════════════
-   CHECKOUT MODAL
-   ════════════════════════════════════════════════════════════ */
 function openCheckoutModal() {
   if (!Cart.count()) return toast("Your cart is empty", "error");
   const items = Cart.get();
@@ -536,30 +437,6 @@ function openCheckoutModal() {
   document.getElementById("checkout-modal").classList.add("open");
 }
 
-document.getElementById("checkout-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = e.target.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "Placing order…";
-  try {
-    const data = await Orders.place({
-      items: Cart.get(),
-      deliveryAddress: document.getElementById("checkout-address").value,
-      note: document.getElementById("checkout-note").value,
-    });
-    Cart.clear(); updateCartBadge();
-    document.getElementById("checkout-modal").classList.remove("open");
-    e.target.reset();
-    toast(`Order ${data.data.orderNumber} placed! 🎉 You'll receive a confirmation email.`, "success");
-    // Open tracker immediately
-    setTimeout(() => openTracker(data.data._id), 800);
-    Pages["my-orders"]?.load?.();
-  } catch (err) { toast(err.message, "error"); }
-  finally { btn.disabled = false; btn.textContent = "Place Order 🎉"; }
-});
-
-/* ════════════════════════════════════════════════════════════
-   ACTION HANDLERS
-   ════════════════════════════════════════════════════════════ */
 function addToCart(id, name, price, emoji) {
   if (!Auth.isLoggedIn() || App.user?.role !== "customer") {
     return toast("Please log in as a customer to order", "error");
@@ -605,13 +482,11 @@ async function toggleUserActive(id) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-/* ── Assign Rider Modal ─────────────────────────────────── */
 async function openAssignRiderModal(orderId, orderNumber) {
   try {
     const res = await Users.getRiders();
     if (!res.data.length) return toast("No available riders found", "error");
     const options = res.data.map(r=>`<option value="${r._id}">${r.name}${r.phone?" · "+r.phone:""}</option>`).join("");
-    const riderSelect = `<select id="assign-rider-select" class="form-select" style="margin:12px 0">${options}</select>`;
     const modal = document.createElement("div");
     modal.className = "modal-overlay open";
     modal.innerHTML = `<div class="modal" style="max-width:380px">
@@ -620,7 +495,7 @@ async function openAssignRiderModal(orderId, orderNumber) {
         <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
       </div>
       <p style="font-size:14px;color:var(--muted)">Select a rider for order <strong>${orderNumber}</strong>:</p>
-      ${riderSelect}
+      <select id="assign-rider-select" class="form-select" style="margin:12px 0">${options}</select>
       <button class="btn btn-primary btn-full" onclick="assignRider('${orderId}',document.getElementById('assign-rider-select').value,this.closest('.modal-overlay'))">Assign Rider</button>
     </div>`;
     document.body.appendChild(modal);
@@ -636,44 +511,6 @@ async function assignRider(orderId, riderId, modalEl) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-/* ── Add Menu Item Form (with image upload) ──────────────── */
-document.getElementById("add-menu-form")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = e.target.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = "Saving…";
-  try {
-    const formData = new FormData();
-    formData.append("name",            document.getElementById("item-name").value);
-    formData.append("description",     document.getElementById("item-desc").value);
-    formData.append("price",           document.getElementById("item-price").value);
-    formData.append("category",        document.getElementById("item-category").value);
-    formData.append("emoji",           document.getElementById("item-emoji").value);
-    formData.append("preparationTime", document.getElementById("item-time").value);
-    const imgFile = document.getElementById("item-image").files[0];
-    if (imgFile) formData.append("image", imgFile);
-
-    await Menu.createWithImage(formData);
-    toast("Menu item added! 🎉", "success");
-    e.target.reset();
-    document.getElementById("item-image-preview").style.display = "none";
-    document.querySelector(".upload-hint").style.display = "block";
-    Pages["manage-menu"].load();
-  } catch (err) { toast(err.message, "error"); }
-  finally { btn.disabled = false; btn.textContent = "Add Item"; }
-});
-
-/* ── Init ────────────────────────────────────────────────── */
-document.addEventListener("DOMContentLoaded", () => {
-  App.init();
-  updateCartBadge();
-  // Wire up image upload drag & drop preview
-  initImageUpload("item-image", "item-image-preview", "item-upload-area");
-});
-
-/* ════════════════════════════════════════════════════════════
-   IMAGE UPLOAD MODAL — for existing menu items
-   ════════════════════════════════════════════════════════════ */
-
 function openImageUploadModal(itemId, itemName) {
   document.getElementById("img-modal-title").textContent = `Upload image for "${itemName}"`;
   document.getElementById("img-modal-item-id").value = itemId;
@@ -688,69 +525,183 @@ function closeImageModal() {
   document.getElementById("img-upload-modal").classList.remove("open");
 }
 
-document.getElementById("img-modal-file")?.addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const preview = document.getElementById("img-modal-preview");
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    document.getElementById("img-modal-hint").style.display = "none";
-  };
-  reader.readAsDataURL(file);
-});
+/* ════════════════════════════════════════════════════════════
+   DOMContentLoaded — ALL event listeners wired here
+   ════════════════════════════════════════════════════════════ */
+document.addEventListener("DOMContentLoaded", () => {
 
-document.getElementById("img-modal-area")?.addEventListener("click", () => {
-  document.getElementById("img-modal-file").click();
-});
+  // Init app
+  App.init();
+  updateCartBadge();
 
-document.getElementById("img-modal-area")?.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  document.getElementById("img-modal-area").classList.add("dragover");
-});
+  // ── Logout ──────────────────────────────────────────────
+  document.getElementById("logout-btn").onclick = handleLogout;
 
-document.getElementById("img-modal-area")?.addEventListener("dragleave", () => {
-  document.getElementById("img-modal-area").classList.remove("dragover");
-});
+  // ── Auth tabs ───────────────────────────────────────────
+  document.querySelectorAll(".auth-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".auth-form").forEach(f => f.classList.add("hidden"));
+      document.getElementById(`${tab.dataset.tab}-form`)?.classList.remove("hidden");
+    });
+  });
 
-document.getElementById("img-modal-area")?.addEventListener("drop", (e) => {
-  e.preventDefault();
-  document.getElementById("img-modal-area").classList.remove("dragover");
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  const dt = new DataTransfer();
-  dt.items.add(file);
-  document.getElementById("img-modal-file").files = dt.files;
-  document.getElementById("img-modal-file").dispatchEvent(new Event("change"));
-});
+  // ── Login form ──────────────────────────────────────────
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "Signing in…";
+    try {
+      const data = await Auth.login(
+        document.getElementById("login-email").value,
+        document.getElementById("login-password").value
+      );
+      App.user = data.user;
+      App.showNavbar();
+      App.navigateTo(App.defaultPageForRole(data.user.role));
+      try { connectSocket(); } catch(e) {}
+      toast(`Welcome back, ${data.user.name}! 🎉`, "success");
+      updateCartBadge();
+    } catch (err) { toast(err.message, "error"); }
+    finally { btn.disabled = false; btn.textContent = "Sign In"; }
+  });
 
-document.getElementById("img-modal-form")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const itemId = document.getElementById("img-modal-item-id").value;
-  const fileInput = document.getElementById("img-modal-file");
-  const btn = e.target.querySelector("button[type=submit]");
+  // ── Register form ───────────────────────────────────────
+  document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "Creating account…";
+    try {
+      const data = await Auth.register({
+        name: document.getElementById("reg-name").value,
+        email: document.getElementById("reg-email").value,
+        password: document.getElementById("reg-password").value,
+        role: document.getElementById("reg-role").value,
+        phone: document.getElementById("reg-phone").value,
+      });
+      App.user = data.user;
+      App.showNavbar();
+      App.navigateTo(App.defaultPageForRole(data.user.role));
+      try { connectSocket(); } catch(e) {}
+      toast(`Account created! Welcome, ${data.user.name}! 🎉`, "success");
+      updateCartBadge();
+    } catch (err) { toast(err.message, "error"); }
+    finally { btn.disabled = false; btn.textContent = "Create Account"; }
+  });
 
-  if (!fileInput.files[0]) {
-    toast("Please select an image first", "error");
-    return;
-  }
+  // ── Cart overlay ────────────────────────────────────────
+  document.getElementById("cart-overlay").addEventListener("click", closeCart);
 
-  btn.disabled = true;
-  btn.textContent = "Uploading…";
+  // ── Checkout button ─────────────────────────────────────
+  document.getElementById("checkout-btn").addEventListener("click", () => {
+    closeCart(); openCheckoutModal();
+  });
 
-  try {
-    const formData = new FormData();
-    formData.append("image", fileInput.files[0]);
+  // ── Checkout form ───────────────────────────────────────
+  document.getElementById("checkout-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "Placing order…";
+    try {
+      const data = await Orders.place({
+        items: Cart.get(),
+        deliveryAddress: document.getElementById("checkout-address").value,
+        note: document.getElementById("checkout-note").value,
+      });
+      Cart.clear(); updateCartBadge();
+      document.getElementById("checkout-modal").classList.remove("open");
+      e.target.reset();
+      toast(`Order ${data.data.orderNumber} placed! 🎉 You'll receive a confirmation email.`, "success");
+      setTimeout(() => openTracker(data.data._id), 800);
+      Pages["my-orders"]?.load?.();
+    } catch (err) { toast(err.message, "error"); }
+    finally { btn.disabled = false; btn.textContent = "Place Order 🎉"; }
+  });
 
-    const data = await Menu.updateWithImage(itemId, formData);
-    toast(`Image uploaded successfully! 🎉`, "success");
-    closeImageModal();
-    Pages["manage-menu"].load();
-  } catch (err) {
-    toast(`Upload failed: ${err.message}`, "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Upload Image";
-  }
+  // ── Add menu item form ──────────────────────────────────
+  document.getElementById("add-menu-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      const formData = new FormData();
+      formData.append("name",            document.getElementById("item-name").value);
+      formData.append("description",     document.getElementById("item-desc").value);
+      formData.append("price",           document.getElementById("item-price").value);
+      formData.append("category",        document.getElementById("item-category").value);
+      formData.append("emoji",           document.getElementById("item-emoji").value);
+      formData.append("preparationTime", document.getElementById("item-time").value);
+      const imgFile = document.getElementById("item-image").files[0];
+      if (imgFile) formData.append("image", imgFile);
+      await Menu.createWithImage(formData);
+      toast("Menu item added! 🎉", "success");
+      e.target.reset();
+      document.getElementById("item-image-preview").style.display = "none";
+      document.querySelector(".upload-hint").style.display = "block";
+      Pages["manage-menu"].load();
+    } catch (err) { toast(err.message, "error"); }
+    finally { btn.disabled = false; btn.textContent = "Add Item"; }
+  });
+
+  // ── Image upload modal file input ───────────────────────
+  document.getElementById("img-modal-file")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const preview = document.getElementById("img-modal-preview");
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      document.getElementById("img-modal-hint").style.display = "none";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("img-modal-area")?.addEventListener("click", () => {
+    document.getElementById("img-modal-file").click();
+  });
+
+  document.getElementById("img-modal-area")?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    document.getElementById("img-modal-area").classList.add("dragover");
+  });
+
+  document.getElementById("img-modal-area")?.addEventListener("dragleave", () => {
+    document.getElementById("img-modal-area").classList.remove("dragover");
+  });
+
+  document.getElementById("img-modal-area")?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    document.getElementById("img-modal-area").classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById("img-modal-file").files = dt.files;
+    document.getElementById("img-modal-file").dispatchEvent(new Event("change"));
+  });
+
+  // ── Image upload modal form submit ──────────────────────
+  document.getElementById("img-modal-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const itemId = document.getElementById("img-modal-item-id").value;
+    const fileInput = document.getElementById("img-modal-file");
+    const btn = e.target.querySelector("button[type=submit]");
+    if (!fileInput.files[0]) { toast("Please select an image first", "error"); return; }
+    btn.disabled = true; btn.textContent = "Uploading…";
+    try {
+      const formData = new FormData();
+      formData.append("image", fileInput.files[0]);
+      await Menu.updateWithImage(itemId, formData);
+      toast("Image uploaded successfully! 🎉", "success");
+      closeImageModal();
+      Pages["manage-menu"].load();
+    } catch (err) { toast(`Upload failed: ${err.message}`, "error"); }
+    finally { btn.disabled = false; btn.textContent = "Upload Image"; }
+  });
+
+  // ── Image upload preview (add item form) ────────────────
+  initImageUpload("item-image", "item-image-preview", "img-upload-area");
+
 });
