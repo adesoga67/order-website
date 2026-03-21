@@ -3,7 +3,7 @@
    ════════════════════════════════════════════════════════════ */
 
 const API_BASE = "http://localhost:5000";
-window.PAYSTACK_PUBLIC_KEY = "pk_test_REPLACE_WITH_YOUR_KEY";
+window.PAYSTACK_PUBLIC_KEY = "pk_live_a22f61cd88f1ae29b8781b9569ca52e3b2460ecb";
 
 /* ── App State ───────────────────────────────────────────── */
 const App = {
