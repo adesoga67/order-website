@@ -2,7 +2,7 @@
    realtime.js  –  WebSocket client, Paystack popup, live UI
    ════════════════════════════════════════════════════════════ */
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = "https://order-website-f0dp.onrender.com";
 let socket = null;
 let notifCount = 0;
 
