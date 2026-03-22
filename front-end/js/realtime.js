@@ -216,9 +216,14 @@ async function startPayment(orderId) {
 
     const user = Auth.getUser();
 
+    // Get order total for Paystack (needs amount in kobo)
+    const orderRes = await Orders.getOne(orderId);
+    const amountKobo = Math.round(orderRes.data.total * 100);
+
     const handler = PaystackPop.setup({
       key: publicKey,
       email: user.email,
+      amount: amountKobo,
       ref: reference,
       currency: "NGN",
       onSuccess: async (txn) => {
