@@ -698,3 +698,241 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 768px) {
   .auth-logo { width: 150px; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   AUTH PAGE — PREMIUM REDESIGN
+   ══════════════════════════════════════════════════════════ */
+
+/* Override old auth left styles */
+#page-auth .auth-left {
+  flex: 1 !important;
+  background: linear-gradient(160deg, #C84B11 0%, #5C1E06 60%, #2A0D03 100%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Texture overlay */
+#page-auth .auth-left::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(232,124,62,0.25) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(200,75,17,0.2) 0%, transparent 40%),
+    radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: auto, auto, 20px 20px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Large decorative circles */
+#page-auth .auth-left::after {
+  content: "";
+  position: absolute; bottom: -100px; left: -60px;
+  width: 350px; height: 350px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none; z-index: 0;
+}
+
+.auth-left-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  height: 100%; padding: 40px 48px;
+  justify-content: space-between;
+}
+
+.auth-left-brand { margin-bottom: 0; }
+.auth-left-logo {
+  height: 36px; filter: brightness(0) invert(1);
+  opacity: 0.95;
+}
+
+.auth-left-headline { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+.auth-left-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 700; color: #fff;
+  line-height: 1.15; margin-bottom: 20px;
+}
+
+.auth-left-desc {
+  font-size: 15px; color: rgba(255,255,255,0.65);
+  line-height: 1.75; max-width: 380px;
+}
+
+.auth-left-pills {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin: 32px 0;
+}
+.auth-pill {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  padding: 8px 16px; border-radius: 30px;
+  font-size: 13px; font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+.auth-left-food {
+  display: flex; gap: 16px; font-size: 28px;
+  opacity: 0.6;
+}
+
+/* Right panel */
+#page-auth .auth-right {
+  width: 480px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 48px 52px !important;
+  background: #FEFCFA !important;
+  position: relative;
+}
+
+.auth-right-logo {
+  position: absolute; top: 28px; right: 32px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.auth-box { width: 100%; max-width: 360px; }
+
+.auth-box-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--text); margin-bottom: 6px;
+  margin-top: 48px;
+}
+.auth-box-subtitle {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* Tab pills */
+.auth-tabs {
+  display: flex;
+  background: #F0EBE6;
+  border-radius: 30px; padding: 4px;
+  margin-bottom: 24px; gap: 2px;
+  border: none !important;
+}
+.auth-tab {
+  flex: 1; padding: 9px 16px;
+  font-size: 13px; font-weight: 700;
+  color: var(--muted); cursor: pointer;
+  border: none !important; background: transparent;
+  border-radius: 26px; transition: all 0.2s;
+  border-bottom: none !important; margin-bottom: 0 !important;
+}
+.auth-tab.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-bottom-color: transparent !important;
+}
+
+/* Auth inputs — cleaner style */
+.auth-input {
+  background: #F7F3F0 !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  padding: 13px 16px !important;
+  transition: all 0.2s !important;
+}
+.auth-input:focus {
+  background: #fff !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(200,75,17,0.1) !important;
+}
+
+/* Submit button */
+.auth-submit {
+  padding: 14px !important;
+  font-size: 15px !important;
+  border-radius: 10px !important;
+  margin-top: 4px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Divider */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--muted); font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Demo grid — 2x2 */
+.demo-logins {
+  background: #F7F3F0 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+}
+.demo-logins h4 {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: var(--muted) !important;
+  margin-bottom: 10px !important;
+}
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.demo-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 9px 12px !important;
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  color: var(--text) !important;
+  transition: all 0.15s !important;
+  margin-bottom: 0 !important;
+  text-align: left !important;
+}
+.demo-btn:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  background: var(--primary-light) !important;
+}
+.demo-hint {
+  font-size: 11px !important;
+  color: var(--muted) !important;
+  margin-top: 10px !important;
+  text-align: center !important;
+}
+
+.auth-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.auth-tab-switch {
+  background: none; border: none;
+  color: var(--primary); font-weight: 700;
+  cursor: pointer; font-size: 13px;
+  padding: 0; text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  #page-auth .auth-left { display: none !important; }
+  #page-auth .auth-right { width: 100% !important; padding: 32px 24px !important; }
+  .auth-box-title { margin-top: 0; }
+  .auth-right-logo { top: 20px; right: 20px; }
+}
