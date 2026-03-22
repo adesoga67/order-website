@@ -192,21 +192,35 @@ function updateTracker(orderId, newStatus) {
 
 /* ── PAYSTACK PAYMENT ────────────────────────────────────── */
 async function startPayment(orderId) {
-  try {
-    toast("Initializing payment…", "info");
-    const res = await Orders.pay(orderId);
-    const { authorizationUrl, reference } = res.data;
+  const publicKey = window.PAYSTACK_PUBLIC_KEY;
 
-    // Load Paystack inline JS if not already loaded
+  // Check public key is configured
+  if (!publicKey || publicKey.includes("REPLACE")) {
+    toast("Paystack public key not configured. Add pk_test_... to app.js", "error");
+    return;
+  }
+
+  toast("Initializing payment…", "info");
+
+  try {
+    // Call backend to create transaction reference
+    const res = await Orders.pay(orderId);
+    if (!res.success) throw new Error(res.message || "Payment initialization failed");
+
+    const { reference } = res.data;
+
+    // Load Paystack inline script if not already loaded
     if (typeof PaystackPop === "undefined") {
       await loadScript("https://js.paystack.co/v1/inline.js");
     }
 
     const user = Auth.getUser();
+
     const handler = PaystackPop.setup({
-      key: window.PAYSTACK_PUBLIC_KEY || prompt("Enter your Paystack public key (pk_test_...):"),
+      key: publicKey,
       email: user.email,
       ref: reference,
+      currency: "NGN",
       onSuccess: async (txn) => {
         toast("✅ Payment successful! Verifying…", "success");
         try {
@@ -215,14 +229,21 @@ async function startPayment(orderId) {
           renderTrackerModal(orderId);
           if (App.currentPage === "my-orders") Pages["my-orders"].load();
         } catch (e) {
-          toast("Payment recorded but verification pending. Check your email.", "info");
+          toast("Payment recorded. Check your email for confirmation.", "info");
         }
       },
-      onCancel: () => toast("Payment cancelled", "error"),
+      onCancel: () => toast("Payment was cancelled", "info"),
     });
+
     handler.openIframe();
+
   } catch (err) {
-    toast(`Payment error: ${err.message}`, "error");
+    console.error("Payment error:", err);
+    if (err.message.includes("Paystack") || err.message.includes("secret")) {
+      toast("Paystack secret key not configured in your .env file", "error");
+    } else {
+      toast(`Payment error: ${err.message}`, "error");
+    }
   }
 }
 
@@ -268,35 +289,31 @@ function showPreview(file, previewEl, areaEl) {
   reader.readAsDataURL(file);
 }
 
-/* ── Extend Orders API with new methods ──────────────────── */
-// These get appended after api.js loads
-window.addEventListener("DOMContentLoaded", () => {
-  // Patch Orders object with new endpoints
-  Orders.pay          = (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" });
-  Orders.verifyPayment = (id, ref) => apiFetch(`/orders/${id}/verify-payment?reference=${ref}`);
+/* ── Extend Orders & Menu API with new methods ───────────── */
+// Patched immediately — no need to wait for DOMContentLoaded
+Orders.pay           = (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" });
+Orders.verifyPayment = (id, ref) => apiFetch(`/orders/${id}/verify-payment?reference=${ref}`);
 
-  // Patch Menu.create to use FormData (supports file uploads)
-  Menu.createWithImage = async (formData) => {
-    const token = getToken();
-    const res = await fetch(`${API_URL}/menu`, {
-      method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Request failed");
-    return data;
-  };
+Menu.createWithImage = async (formData) => {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/menu`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Request failed");
+  return data;
+};
 
-  Menu.updateWithImage = async (id, formData) => {
-    const token = getToken();
-    const res = await fetch(`${API_URL}/menu/${id}`, {
-      method: "PUT",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Request failed");
-    return data;
-  };
-});
+Menu.updateWithImage = async (id, formData) => {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/menu/${id}`, {
+    method: "PUT",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Request failed");
+  return data;
+};
