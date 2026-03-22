@@ -9,17 +9,13 @@ const getUser = () => {
   const u = localStorage.getItem("chownow_user");
   return u ? JSON.parse(u) : null;
 };
-const setUser = (user) =>
-  localStorage.setItem("chownow_user", JSON.stringify(user));
+const setUser = (user) => localStorage.setItem("chownow_user", JSON.stringify(user));
 const removeUser = () => localStorage.removeItem("chownow_user");
 
 // ── Base fetch wrapper ────────────────────────────────────────
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
@@ -32,19 +28,13 @@ async function apiFetch(endpoint, options = {}) {
 // ── Auth API ─────────────────────────────────────────────────
 const Auth = {
   async register(payload) {
-    const data = await apiFetch("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+    const data = await apiFetch("/auth/register", { method: "POST", body: JSON.stringify(payload) });
     setToken(data.token);
     setUser(data.user);
     return data;
   },
   async login(email, password) {
-    const data = await apiFetch("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    const data = await apiFetch("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -52,7 +42,6 @@ const Auth = {
   logout() {
     removeToken();
     removeUser();
-    window.location.href = "/";
   },
   getUser,
   isLoggedIn: () => !!getToken(),
@@ -62,43 +51,55 @@ const Auth = {
 const Menu = {
   getAll: (params = "") => apiFetch(`/menu${params}`),
   getOne: (id) => apiFetch(`/menu/${id}`),
-  create: (payload) =>
-    apiFetch("/menu", { method: "POST", body: JSON.stringify(payload) }),
-  update: (id, payload) =>
-    apiFetch(`/menu/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  create: (payload) => apiFetch("/menu", { method: "POST", body: JSON.stringify(payload) }),
+  update: (id, payload) => apiFetch(`/menu/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   delete: (id) => apiFetch(`/menu/${id}`, { method: "DELETE" }),
+
+  // Multipart upload — used when creating a menu item with an image
+  createWithImage: async (formData) => {
+    const token = getToken();
+    const res = await fetch(`${API_URL}/menu`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Request failed");
+    return data;
+  },
+
+  // Multipart upload — used when updating an existing item's image
+  updateWithImage: async (id, formData) => {
+    const token = getToken();
+    const res = await fetch(`${API_URL}/menu/${id}`, {
+      method: "PUT",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Request failed");
+    return data;
+  },
 };
 
 // ── Orders API ───────────────────────────────────────────────
 const Orders = {
   getAll: () => apiFetch("/orders"),
   getOne: (id) => apiFetch(`/orders/${id}`),
-  place: (payload) =>
-    apiFetch("/orders", { method: "POST", body: JSON.stringify(payload) }),
-  updateStatus: (id, status) =>
-    apiFetch(`/orders/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    }),
-  assignRider: (id, riderId) =>
-    apiFetch(`/orders/${id}/assign-rider`, {
-      method: "PATCH",
-      body: JSON.stringify({ riderId }),
-    }),
+  place: (payload) => apiFetch("/orders", { method: "POST", body: JSON.stringify(payload) }),
+  updateStatus: (id, status) => apiFetch(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  assignRider: (id, riderId) => apiFetch(`/orders/${id}/assign-rider`, { method: "PATCH", body: JSON.stringify({ riderId }) }),
   markDelivered: (id) => apiFetch(`/orders/${id}/deliver`, { method: "PATCH" }),
+  pay: (id) => apiFetch(`/orders/${id}/pay`, { method: "POST" }),
+  verifyPayment: (id, ref) => apiFetch(`/orders/${id}/verify-payment?reference=${ref}`),
 };
 
 // ── Users API ─────────────────────────────────────────────────
 const Users = {
   getAll: (role = "") => apiFetch(`/users${role ? `?role=${role}` : ""}`),
   getRiders: () => apiFetch("/users/riders"),
-  toggleActive: (id) =>
-    apiFetch(`/users/${id}/toggle-active`, { method: "PATCH" }),
-  updateRole: (id, role) =>
-    apiFetch(`/users/${id}/role`, {
-      method: "PATCH",
-      body: JSON.stringify({ role }),
-    }),
+  toggleActive: (id) => apiFetch(`/users/${id}/toggle-active`, { method: "PATCH" }),
+  updateRole: (id, role) => apiFetch(`/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role }) }),
 };
 
 // ── Cart helpers (localStorage) ──────────────────────────────
@@ -118,10 +119,7 @@ const Cart = {
   updateQty(menuItemId, qty) {
     const cart = Cart.get();
     const item = cart.find((c) => c.menuItem === menuItemId);
-    if (item) {
-      item.quantity = qty;
-      if (qty <= 0) return Cart.remove(menuItemId);
-    }
+    if (item) { item.quantity = qty; if (qty <= 0) return Cart.remove(menuItemId); }
     Cart.save(cart);
   },
   clear: () => localStorage.removeItem("chownow_cart"),

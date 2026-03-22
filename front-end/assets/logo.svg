@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 220" width="260" height="220" role="img" aria-label="ChowNow logo">
+
+  <defs>
+    <pattern id="adire" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="none"/>
+      <circle cx="6" cy="6" r="1.2" fill="#fff" opacity="0.18"/>
+      <line x1="0" y1="0" x2="12" y2="12" stroke="#fff" stroke-width="0.4" opacity="0.1"/>
+      <line x1="12" y1="0" x2="0" y2="12" stroke="#fff" stroke-width="0.4" opacity="0.1"/>
+    </pattern>
+    <clipPath id="emblem-clip">
+      <rect x="0" y="0" width="260" height="220" rx="24"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="260" height="220" rx="24" fill="#C84B11"/>
+  <rect x="0" y="0" width="260" height="220" rx="24" fill="url(#adire)"/>
+
+  <!-- Border frames -->
+  <rect x="8" y="8" width="244" height="204" rx="18" fill="none" stroke="#fff" stroke-width="1" opacity="0.25"/>
+  <rect x="14" y="14" width="232" height="192" rx="14" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- Bottom stripe band -->
+  <rect x="0" y="164" width="260" height="56" rx="0" fill="#8B3210" clip-path="url(#emblem-clip)"/>
+  <rect x="0" y="164" width="260" height="4" fill="#E87C3E" opacity="0.8"/>
+  <rect x="0" y="172" width="260" height="2" fill="#fff" opacity="0.1"/>
+  <rect x="0" y="178" width="260" height="2" fill="#fff" opacity="0.06"/>
+
+  <!-- Steam wisps -->
+  <path d="M90 78 Q86 68 90 58 Q94 48 90 38" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+  <path d="M110 74 Q106 64 110 54 Q114 44 110 34" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+  <path d="M130 78 Q126 68 130 58 Q134 48 130 38" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Bowl outer glow -->
+  <ellipse cx="110" cy="122" rx="68" ry="42" fill="#fff" opacity="0.15"/>
+
+  <!-- Bowl body -->
+  <path d="M42 110 Q42 155 110 155 Q178 155 178 110 Q178 88 110 85 Q42 88 42 110Z" fill="#fff" opacity="0.95"/>
+
+  <!-- Food surface -->
+  <ellipse cx="110" cy="102" rx="56" ry="20" fill="#E87C3E" opacity="0.9"/>
+
+  <!-- Jollof rice texture -->
+  <circle cx="98"  cy="100" r="2.5" fill="#C84B11" opacity="0.6"/>
+  <circle cx="110" cy="98"  r="2.5" fill="#C84B11" opacity="0.6"/>
+  <circle cx="122" cy="100" r="2.5" fill="#C84B11" opacity="0.6"/>
+  <circle cx="104" cy="105" r="2"   fill="#8B3210" opacity="0.4"/>
+  <circle cx="116" cy="104" r="2"   fill="#8B3210" opacity="0.4"/>
+
+  <!-- Bowl rim -->
+  <ellipse cx="110" cy="102" rx="56" ry="20" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Bowl base -->
+  <rect x="98"  y="154" width="24" height="6" rx="3" fill="#fff" opacity="0.9"/>
+  <rect x="90"  y="159" width="40" height="4" rx="2" fill="#fff" opacity="0.7"/>
+
+  <!-- Brand name -->
+  <text x="130" y="196"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    font-weight="700"
+    letter-spacing="6"
+    fill="#fff"
+    opacity="0.97">CHOWNOW</text>
+
+  <!-- Tagline -->
+  <text x="130" y="210"
+    text-anchor="middle"
+    font-family="Georgia, serif"
+    font-size="8"
+    font-weight="400"
+    letter-spacing="3.5"
+    fill="#fff"
+    opacity="0.55">ORDER · TRACK · ENJOY</text>
+
+  <!-- Corner diamond motifs -->
+  <polygon points="16,10 22,16 16,22 10,16" fill="#fff" opacity="0.2"/>
+  <polygon points="244,10 250,16 244,22 238,16" fill="#fff" opacity="0.2"/>
+  <polygon points="16,198 22,204 16,210 10,204" fill="#fff" opacity="0.2"/>
+  <polygon points="244,198 250,204 244,210 238,204" fill="#fff" opacity="0.2"/>
+
+</svg>
