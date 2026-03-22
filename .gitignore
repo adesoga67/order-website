@@ -1,38 +1,70 @@
-# ── Dependencies ─────────────────────────────────────────────
-node_modules/
-.npm
+# ══════════════════════════════════════════════════════════════
+# ChowNow — .gitignore
+# ══════════════════════════════════════════════════════════════
 
-# ── Environment variables (NEVER commit these) ───────────────
+# ── Environment variables (NEVER commit these) ────────────────
 .env
 .env.local
 .env.development
 .env.production
+.env.staging
+.env.test
+*.env
 
-# ── Uploaded images ──────────────────────────────────────────
-backend/uploads/*
-!backend/uploads/.gitkeep
+# ── Node dependencies ─────────────────────────────────────────
+node_modules/
+.npm
+.yarn
+yarn.lock
+package-lock.json
 
-# ── Logs ─────────────────────────────────────────────────────
+# ── Uploaded images ───────────────────────────────────────────
+back-end/uploads/*
+!back-end/uploads/.gitkeep
+
+# ── Logs ──────────────────────────────────────────────────────
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+nodemon-debug.log*
+pnpm-debug.log*
 
-# ── OS files ─────────────────────────────────────────────────
+# ── OS generated files ────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# ── VS Code settings ─────────────────────────────────────────
+# ── VS Code ───────────────────────────────────────────────────
 .vscode/
 *.code-workspace
+.history/
 
-# ── Build / cache ─────────────────────────────────────────────
+# ── Build & cache ─────────────────────────────────────────────
 dist/
 build/
 .cache/
+.parcel-cache/
+.temp/
+tmp/
 
-# ── Misc ──────────────────────────────────────────────────────
+# ── Archives ──────────────────────────────────────────────────
 *.zip
 *.tar.gz
+*.rar
+
+# ── Sensitive config files ────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
+*.p8
+serviceAccountKey.json
