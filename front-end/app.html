@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChowNow – Food Ordering</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="shortcut icon" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ── Toast Container ──────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── Navbar ───────────────────────────────────────────────── -->
+<nav class="navbar hidden" id="navbar">
+  <div class="navbar-brand">
+    <img src="assets/logo-navbar.svg" alt="ChowNow" class="navbar-logo" />
+  </div>
+  <div class="navbar-nav" id="navbar-nav"></div>
+  <div class="navbar-right">
+    <span id="live-indicator" class="live-indicator hidden">
+      <span class="live-dot"></span>Live
+    </span>
+    <button class="btn btn-ghost btn-sm notif-btn hidden" id="notif-btn" onclick="clearNotif()" title="Notifications">
+      🔔 <span class="notif-badge" id="notif-badge">0</span>
+    </button>
+    <button class="btn btn-ghost btn-sm cart-btn hidden" id="cart-btn" onclick="openCart()">
+      🛒 Cart <span class="cart-badge hidden" id="cart-badge">0</span>
+    </button>
+    <div id="user-info" class="user-info"></div>
+    <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: AUTH                                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-auth" class="page page-auth active">
+  <div class="auth-layout">
+
+    <!-- Left panel -->
+    <div class="auth-left">
+      <img src="assets/logo.svg" alt="ChowNow" class="auth-logo" />
+      <p class="auth-left-subtitle">Order your favourite Nigerian dishes delivered hot to your door.</p>
+      <div class="auth-food-grid">
+        <div class="auth-food-item">🍛</div>
+        <div class="auth-food-item">🥣</div>
+        <div class="auth-food-item">🍢</div>
+        <div class="auth-food-item">🍔</div>
+        <div class="auth-food-item">🍌</div>
+        <div class="auth-food-item">🫕</div>
+        <div class="auth-food-item">🍲</div>
+        <div class="auth-food-item">🥨</div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="auth-right">
+      <div class="auth-box">
+        <h2 class="auth-box-title">Welcome back!</h2>
+        <p class="auth-box-subtitle">Sign in or create a new account</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Sign In</button>
+          <button class="auth-tab" data-tab="register">Register</button>
+        </div>
+
+        <!-- Login form -->
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input id="login-email" type="email" class="form-input" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input id="login-password" type="password" class="form-input" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+        </form>
+
+        <!-- Register form -->
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input id="reg-name" type="text" class="form-input" placeholder="Your full name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input id="reg-email" type="email" class="form-input" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input id="reg-phone" type="tel" class="form-input" placeholder="+234 800 000 0000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">I am a</label>
+            <select id="reg-role" class="form-select">
+              <option value="customer">Customer</option>
+              <option value="restaurant_admin">Restaurant Admin</option>
+              <option value="rider">Delivery Rider</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input id="reg-password" type="password" class="form-input" placeholder="Min 6 characters" required minlength="6" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        </form>
+
+        <!-- Demo logins -->
+        <div class="demo-logins">
+          <h4>Quick demo access</h4>
+          <button class="demo-btn" onclick="demoLogin('customer@demo.com')">👤 Customer demo</button>
+          <button class="demo-btn" onclick="demoLogin('restaurant@demo.com')">👨‍🍳 Restaurant Admin demo</button>
+          <button class="demo-btn" onclick="demoLogin('rider@demo.com')">🏍️ Rider demo</button>
+          <button class="demo-btn" onclick="demoLogin('admin@demo.com')">🛡️ Super Admin demo</button>
+          <p class="demo-hint">Password for all demos: <strong>demo123</strong></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: CUSTOMER – MENU                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-menu" class="page">
+  <div class="page-header">
+    <h1>Our Menu</h1>
+    <p>Fresh, tasty Nigerian meals delivered to your door</p>
+  </div>
+  <div id="menu-filters" class="menu-filters"></div>
+  <div id="menu-grid" class="menu-grid">
+    <div class="empty-state">
+      <div class="emoji">⏳</div>
+      <h3>Loading menu…</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: CUSTOMER – MY ORDERS                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-my-orders" class="page">
+  <div class="page-header">
+    <h1>My Orders</h1>
+    <p>Track all your past and active orders</p>
+  </div>
+  <div id="my-orders-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: RESTAURANT ADMIN – DASHBOARD                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-restaurant-dashboard" class="page">
+  <div class="page-header">
+    <h1>Restaurant Dashboard</h1>
+    <p>Live order management — updates in real time</p>
+  </div>
+  <div id="rd-stats" class="stats-grid"></div>
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Recent Orders</h3>
+      <button class="btn btn-ghost btn-sm" onclick="Pages['restaurant-dashboard'].load()">↻ Refresh</button>
+    </div>
+    <div id="rd-recent-orders"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: RESTAURANT ADMIN – MANAGE MENU                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-manage-menu" class="page">
+  <div class="page-header">
+    <h1>Manage Menu</h1>
+    <p>Add, edit or remove menu items</p>
+  </div>
+  <div class="manage-menu-layout">
+
+    <!-- Menu items list -->
+    <div class="manage-menu-list">
+      <h3 class="section-title">Menu Items</h3>
+      <div id="manage-menu-grid"></div>
+    </div>
+
+    <!-- Add item form -->
+    <div class="card">
+      <h3 class="card-title">Add New Item</h3>
+      <form id="add-menu-form">
+        <div class="form-group">
+          <label class="form-label">Item Name</label>
+          <input id="item-name" type="text" class="form-input" placeholder="e.g. Jollof Rice" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="item-desc" class="form-input form-textarea" placeholder="Short description…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="item-category" class="form-select">
+            <option>Rice Dishes</option>
+            <option>Soups &amp; Swallows</option>
+            <option>Grills</option>
+            <option>Snacks</option>
+            <option>Fast Food</option>
+            <option>Drinks</option>
+            <option>Desserts</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Price (₦)</label>
+            <input id="item-price" type="number" class="form-input" placeholder="2500" required min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prep Time (min)</label>
+            <input id="item-time" type="number" class="form-input" placeholder="20" value="20" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emoji</label>
+          <input id="item-emoji" type="text" class="form-input" placeholder="🍛" maxlength="4" value="🍽️" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Item Image (optional)</label>
+          <div class="img-upload-area" id="img-upload-area">
+            <input type="file" id="item-image" accept="image/jpeg,image/png,image/webp" />
+            <div class="upload-hint">
+              <div class="upload-hint-icon">📷</div>
+              <div class="upload-hint-text">Click or drag &amp; drop<br>
+                <span class="upload-hint-sub">JPEG, PNG, WebP · Max 5MB</span>
+              </div>
+            </div>
+            <img id="item-image-preview" class="img-preview" alt="Preview" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Add Item</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: RESTAURANT ADMIN – ORDERS                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-restaurant-orders" class="page">
+  <div class="page-header">
+    <h1>All Orders</h1>
+    <p>Manage and update order statuses</p>
+  </div>
+  <div id="restaurant-orders-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: RIDER – DASHBOARD                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-rider-dashboard" class="page">
+  <div class="page-header">
+    <h1>My Deliveries</h1>
+    <p>Live delivery updates</p>
+  </div>
+  <div id="rider-stats" class="stats-grid"></div>
+  <div class="card card-mt">
+    <div class="card-header">
+      <h3 class="card-title">Assigned Orders</h3>
+      <button class="btn btn-ghost btn-sm" onclick="Pages['rider-dashboard'].load()">↻ Refresh</button>
+    </div>
+    <div id="rider-orders"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: SUPER ADMIN – DASHBOARD                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-admin-dashboard" class="page">
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Platform-wide overview</p>
+  </div>
+  <div id="admin-stats" class="stats-grid"></div>
+  <div class="card card-mt">
+    <h3 class="card-title card-title-spaced">Recent Orders</h3>
+    <div id="admin-recent-orders"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: SUPER ADMIN – ALL ORDERS                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-admin-orders" class="page">
+  <div class="page-header">
+    <h1>All Orders</h1>
+    <p>Platform-wide order management</p>
+  </div>
+  <div id="admin-orders-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PAGE: SUPER ADMIN – USERS                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="page-admin-users" class="page">
+  <div class="page-header">
+    <h1>User Management</h1>
+    <p>Manage all registered users</p>
+  </div>
+  <div id="admin-users-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CART SIDEBAR                                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3 class="cart-title">🛒 Your Cart</h3>
+    <button class="btn btn-ghost btn-sm" onclick="closeCart()">✕ Close</button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer hidden" id="cart-footer">
+    <div class="cart-summary-row"><span>Subtotal</span><span id="cart-subtotal">₦0</span></div>
+    <div class="cart-summary-row"><span>Delivery fee</span><span id="cart-delivery">₦500</span></div>
+    <div class="cart-summary-total"><span>Total</span><span id="cart-total">₦500</span></div>
+    <button class="btn btn-primary btn-full checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CHECKOUT MODAL                                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Complete Your Order</h3>
+      <button class="modal-close" onclick="document.getElementById('checkout-modal').classList.remove('open')">✕</button>
+    </div>
+    <div id="checkout-items-summary" class="checkout-summary"></div>
+    <form id="checkout-form">
+      <div class="form-group">
+        <label class="form-label">Delivery Address</label>
+        <textarea id="checkout-address" class="form-input form-textarea-resize" rows="2" placeholder="Enter your full delivery address" required></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Order Note (optional)</label>
+        <input id="checkout-note" type="text" class="form-input" placeholder="Any special instructions?" />
+      </div>
+      <div class="checkout-total-row">
+        <span>Total to pay:</span>
+        <span id="checkout-total-display" class="checkout-total-amount"></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Place Order 🎉</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ORDER TRACKER MODAL                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="tracker-modal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">Order Tracker</h3>
+        <div class="tracker-subtitle">
+          <span class="live-dot"></span>
+          <span id="tracker-order-num"></span>
+        </div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('tracker-modal').classList.remove('open');activeTrackerOrderId=null;">✕</button>
+    </div>
+
+    <!-- Animated step tracker -->
+    <div class="tracker-steps" id="tracker-steps"></div>
+
+    <!-- Order meta grid -->
+    <div class="tracker-meta-grid">
+      <div class="tracker-meta-box">
+        <div class="tracker-meta-label">Delivery to</div>
+        <div class="tracker-meta-value" id="tracker-address"></div>
+      </div>
+      <div class="tracker-meta-box">
+        <div class="tracker-meta-label">Total</div>
+        <div class="tracker-meta-value tracker-meta-price" id="tracker-total"></div>
+      </div>
+    </div>
+
+    <!-- Payment row -->
+    <div class="tracker-payment-row" id="tracker-payment"></div>
+
+    <!-- Rider info -->
+    <div id="tracker-rider"></div>
+
+    <!-- Status history -->
+    <div class="tracker-history-section">
+      <div class="tracker-history-label">History</div>
+      <div id="tracker-history" class="tracker-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- IMAGE UPLOAD MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="img-upload-modal">
+  <div class="modal modal-img">
+    <div class="modal-header">
+      <h3 id="img-modal-title">Upload image</h3>
+      <button class="modal-close" onclick="closeImageModal()">✕</button>
+    </div>
+    <form id="img-modal-form">
+      <input type="hidden" id="img-modal-item-id" />
+      <div class="img-upload-area" id="img-modal-area">
+        <input type="file" id="img-modal-file" accept="image/jpeg,image/png,image/webp" />
+        <div class="upload-hint" id="img-modal-hint">
+          <div class="upload-hint-icon">📷</div>
+          <div class="upload-hint-text">Click or drag &amp; drop your food photo<br><span class="upload-hint-sub">JPEG, PNG or WebP · Max 5MB · Square images work best</span></div>
+        </div>
+        <img id="img-modal-preview" class="img-preview" alt="Preview" />
+      </div>
+      <div class="img-modal-tips">
+        <div class="img-tip">✅ Use a square photo (600×600px or larger)</div>
+        <div class="img-tip">✅ Good lighting makes food look more appetizing</div>
+        <div class="img-tip">✅ Plain or blurred background works best</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Upload Image</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── Scripts ───────────────────────────────────────────────── -->
+<script src="js/api.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
