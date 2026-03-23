@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://order-website-f0dp.onrender.com/api";
 
 // ── Token helpers ────────────────────────────────────────────
 const getToken = () => localStorage.getItem("chownow_token");
