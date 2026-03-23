@@ -17,7 +17,7 @@ const httpServer = http.createServer(app);
 
 // ── Allowed origins ───────────────────────────────────────────
 const allowedOrigins = [
-  "https://chownow.netlify.app",       // production frontend
+  "https://chic-cendol-2a6a90.netlify.app/",       // production frontend
   "http://localhost:5500",             // VS Code Live Server
   "http://localhost:5501",             // VS Code Live Server (alt port)
   "http://127.0.0.1:5500",
