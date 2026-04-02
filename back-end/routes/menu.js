@@ -44,8 +44,8 @@ router.post(
       let imageUrl = "";
 
       if (req.file) {
-        imageUrl = await processAndSave(req.file.buffer, "menu");
-      }
+  imageUrl = req.file.path; // Cloudinary returns the URL in req.file.path
+}
 
       const item = await MenuItem.create({
         name, description, price: Number(price), category, emoji,

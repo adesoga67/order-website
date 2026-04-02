@@ -1,54 +1,59 @@
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
-const sharp = require("sharp");
-const path = require("path");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
 
-const UPLOAD_DIR = path.join(__dirname, "../uploads");
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.dwdgoitzv,
+  api_key:    process.env.469239145564615,
+  api_secret: process.env.3FbMYEjaskNDzA1lD_qvCRYzN88,
+});
 
-// Ensure uploads directory exists
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-// ── Multer: store in memory for sharp processing ─────────────
-const storage = multer.memoryStorage();
-
-const fileFilter = (req, file, cb) => {
-  const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error("Only JPEG, PNG, and WebP images are allowed"), false);
-};
-
-const MAX_MB = parseInt(process.env.MAX_FILE_SIZE_MB) || 5;
+// Storage — images go directly to Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "chownow/menu",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 600, height: 600, crop: "fill", quality: 82 }],
+  },
+});
 
 const upload = multer({
   storage,
-  fileFilter,
-  limits: { fileSize: MAX_MB * 1024 * 1024 },
+  limits: { fileSize: (parseInt(process.env.MAX_FILE_SIZE_MB) || 5) * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Only JPEG, PNG and WebP images are allowed"), false);
+  },
 });
 
-// ── Process & save uploaded image via sharp ──────────────────
+// processAndSave is no longer needed — Cloudinary handles it
+// But we keep the signature so routes don't need to change
 const processAndSave = async (buffer, subfolder = "menu") => {
-  const dir = path.join(UPLOAD_DIR, subfolder);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  const filename = `${uuidv4()}.webp`;
-  const filepath = path.join(dir, filename);
-
-  await sharp(buffer)
-    .resize(600, 600, { fit: "cover", position: "center" })
-    .webp({ quality: 82 })
-    .toFile(filepath);
-
-  // Return the public URL path
-  return `/uploads/${subfolder}/${filename}`;
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: `chownow/${subfolder}`, transformation: [{ width: 600, height: 600, crop: "fill", quality: 82 }] },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
 };
 
-// ── Delete old image file ────────────────────────────────────
-const deleteImage = (urlPath) => {
-  if (!urlPath) return;
-  const filepath = path.join(__dirname, "..", urlPath);
-  if (fs.existsSync(filepath)) {
-    fs.unlink(filepath, (err) => { if (err) console.error("Error deleting image:", err.message); });
+const deleteImage = async (urlOrPublicId) => {
+  if (!urlOrPublicId) return;
+  try {
+    // Extract public_id from Cloudinary URL
+    const parts = urlOrPublicId.split("/");
+    const filename = parts[parts.length - 1].split(".")[0];
+    const folder = parts[parts.length - 2];
+    await cloudinary.uploader.destroy(`${folder}/${filename}`);
+  } catch (err) {
+    console.error("Cloudinary delete error:", err.message);
   }
 };
 
