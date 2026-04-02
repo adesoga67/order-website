@@ -78,10 +78,9 @@ router.put(
 
       const updates = { ...req.body };
       if (req.file) {
-        // Delete old image before saving new one
-        if (item.image) deleteImage(item.image);
-        updates.image = await processAndSave(req.file.buffer, "menu");
-      }
+  if (item.image) deleteImage(item.image);
+  updates.image = req.file.path;
+}
 
       const updated = await MenuItem.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
       res.json({ success: true, message: "Menu item updated", data: updated });
