@@ -698,3 +698,105 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 768px) {
   .auth-logo { width: 150px; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* Auth page */
+  #page-auth .auth-left { display: none !important; }
+  #page-auth .auth-right {
+    width: 100% !important;
+    padding: 32px 20px !important;
+    min-height: 100vh;
+    align-items: flex-start !important;
+    padding-top: 48px !important;
+  }
+  .auth-box { max-width: 100% !important; }
+  .auth-box-title { margin-top: 0 !important; font-size: 24px !important; }
+  .auth-right-logo { top: 16px !important; right: 16px !important; }
+  .auth-form-row { grid-template-columns: 1fr !important; }
+  .demo-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Navbar */
+  .navbar { padding: 0 16px !important; height: 56px; }
+  .navbar-logo { height: 28px !important; }
+  .navbar-nav { display: none !important; }
+  .navbar-right { gap: 6px !important; }
+  #user-info > div:last-child { display: none !important; }
+
+  /* Pages */
+  .page { padding: 16px !important; }
+  .page-header h1 { font-size: 20px !important; }
+  .page-header p { font-size: 13px !important; }
+
+  /* Stats grid */
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-value { font-size: 22px !important; }
+  .stat-card { padding: 14px 16px !important; }
+
+  /* Menu grid */
+  .menu-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  .menu-card-name { font-size: 13px !important; }
+  .menu-card-price { font-size: 15px !important; }
+  .menu-card-emoji { height: 90px !important; font-size: 36px !important; }
+  .menu-card-body { padding: 12px !important; }
+  .menu-card-desc { display: none !important; }
+
+  /* Menu filters */
+  .menu-filters { gap: 6px !important; }
+  .filter-btn { padding: 6px 12px !important; font-size: 12px !important; }
+
+  /* Cart sidebar */
+  .cart-sidebar { width: 100% !important; }
+
+  /* Manage menu layout */
+  .manage-menu-layout { grid-template-columns: 1fr !important; }
+  .manage-menu-actions { flex-wrap: wrap !important; gap: 6px !important; }
+  .manage-menu-actions .btn { font-size: 11px !important; padding: 5px 8px !important; }
+
+  /* Tables */
+  .table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  table { min-width: 580px; }
+  thead th { padding: 10px 12px !important; font-size: 11px !important; }
+  tbody td { padding: 10px 12px !important; font-size: 13px !important; }
+
+  /* Modals */
+  .modal {
+    padding: 20px 16px !important;
+    margin: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+    border-radius: 14px !important;
+  }
+  .modal-wide { max-width: calc(100vw - 24px) !important; }
+
+  /* Tracker steps */
+  .tracker-meta-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+  .tracker-step-label { font-size: 9px !important; }
+  .tracker-dot { width: 32px !important; height: 32px !important; font-size: 13px !important; }
+  .tracker-steps { gap: 0 !important; }
+
+  /* Cards */
+  .card { padding: 16px !important; }
+  .card-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+
+  /* Checkout */
+  .checkout-total-row { font-size: 14px !important; }
+  .checkout-summary { padding: 10px !important; }
+
+  /* My orders */
+  .pay-now-btn { width: 100% !important; text-align: center !important; justify-content: center !important; }
+  .btn-outline { width: 100% !important; }
+}
+
+@media (max-width: 480px) {
+  .menu-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr !important; }
+  .demo-grid { grid-template-columns: 1fr !important; }
+  .navbar-right { gap: 4px !important; }
+  #user-info { display: none !important; }
+  .page-header h1 { font-size: 18px !important; }
+  .btn-hero-primary, .btn-hero-secondary { width: 100% !important; justify-content: center !important; }
+}
