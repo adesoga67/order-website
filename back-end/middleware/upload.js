@@ -4,9 +4,9 @@ const multer = require("multer");
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.dwdgoitzv,
-  api_key:    process.env.469239145564615,
-  api_secret: process.env.3FbMYEjaskNDzA1lD_qvCRYzN88,
+cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+api_key:    process.env.CLOUDINARY_API_KEY,
+api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Storage — images go directly to Cloudinary
